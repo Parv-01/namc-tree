@@ -175,7 +175,9 @@ const Tree = (() => {
 
   /** Attach click / toggle listeners to a transformed node. */
   function _wireNode(li, toggle, row, code, isLeaf, childUL) {
-    // Toggle expand/collapse
+
+    // ── Toggle button (the small arrow) ──
+    // Clicking the arrow ONLY toggles — does not open the panel.
     toggle.addEventListener('click', e => {
       e.stopPropagation();
       if (!isLeaf && childUL) {
@@ -184,8 +186,21 @@ const Tree = (() => {
       }
     });
 
-    // Click row → open detail panel
-    row.addEventListener('click', () => {
+    // ── Row click / tap ──
+    // A single tap does TWO things:
+    //   1. If node has children → expand or collapse it
+    //   2. Always → open the detail panel
+    row.addEventListener('click', e => {
+      // Ignore clicks on the toggle arrow and action buttons
+      if (e.target.closest('.node-toggle') || e.target.closest('.node-actions')) return;
+
+      // 1. Expand / collapse if this node has children
+      if (!isLeaf && childUL) {
+        li.classList.toggle('collapsed');
+        toggle.classList.toggle('open', !li.classList.contains('collapsed'));
+      }
+
+      // 2. Open the detail panel
       if (!Store.isDeleted(code)) {
         _setActive(li);
         _panel.open(code);
