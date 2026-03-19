@@ -424,33 +424,64 @@ li.dx-treeview-node > .node-row:hover .node-actions { opacity: 1; }
 .node-act-btn:hover { color: var(--text); background: var(--surface2); }
 .node-act-btn.del:hover { color: var(--danger); border-color: var(--danger); background: rgba(239,68,68,.08); }
 
-/* ─── LEVEL COLOURS (label text) ─── */
-li[aria-level="1"]  > .node-row > .node-label { color: var(--l1); font-weight: 700; font-size: 14px; }
-li[aria-level="1"]  > .node-row { background: rgba(249,115,22,.05); border-left: 3px solid rgba(249,115,22,.5); border-radius: 0 6px 6px 0; margin-bottom: 2px; }
-li[aria-level="2"]  > .node-row > .node-label { color: var(--l2); font-weight: 600; font-size: 13.5px; }
-li[aria-level="2"]  > .node-row { border-left: 2px solid rgba(251,146,60,.3); border-radius: 0 6px 6px 0; }
-li[aria-level="3"]  > .node-row > .node-label { color: var(--l3); font-weight: 600; }
-li[aria-level="3"]  > .node-row { border-left: 2px solid rgba(192,132,252,.25); border-radius: 0 6px 6px 0; }
-li[aria-level="4"]  > .node-row > .node-label { color: var(--l4); font-weight: 500; }
-li[aria-level="5"]  > .node-row > .node-label { color: var(--l5); }
-li[aria-level="6"]  > .node-row > .node-label { color: var(--l6); }
-li[aria-level="7"]  > .node-row > .node-label { color: var(--l7); }
-li[aria-level="8"]  > .node-row > .node-label { color: var(--l8); }
-li[aria-level="9"]  > .node-row > .node-label { color: var(--l9); }
-li[aria-level="10"] > .node-row > .node-label { color: var(--l10); }
+/* ─── LEVEL COLOURS (label text) ───────────────────────────────
+   IMPORTANT: The fallback rule MUST come first.
+   Specific rules below override it via source order.
+   li[aria-level] and li[aria-level="N"] have equal specificity,
+   so whichever is declared LAST wins. Fallback = first, specific = last.
+─────────────────────────────────────────────────────────────── */
+
+/* Fallback for levels 21+ — declared FIRST so specific rules below override */
+li[aria-level] > .node-row > .node-label { color: var(--lN); }
+
+/* Level 1 — root */
+li[aria-level="1"] > .node-row > .node-label { color: var(--l1) !important; font-weight: 700; font-size: 14px; }
+li[aria-level="1"] > .node-row { background: rgba(249,115,22,.05); border-left: 3px solid rgba(249,115,22,.5); border-radius: 0 6px 6px 0; margin-bottom: 2px; }
+
+/* Level 2 */
+li[aria-level="2"] > .node-row > .node-label { color: var(--l2) !important; font-weight: 600; font-size: 13.5px; }
+li[aria-level="2"] > .node-row { border-left: 2px solid rgba(251,146,60,.3); border-radius: 0 6px 6px 0; }
+
+/* Level 3 */
+li[aria-level="3"] > .node-row > .node-label { color: var(--l3) !important; font-weight: 600; }
+li[aria-level="3"] > .node-row { border-left: 2px solid rgba(192,132,252,.25); border-radius: 0 6px 6px 0; }
+
+/* Level 4 */
+li[aria-level="4"]  > .node-row > .node-label { color: var(--l4)  !important; font-weight: 500; }
+
+/* Level 5 */
+li[aria-level="5"]  > .node-row > .node-label { color: var(--l5)  !important; }
+
+/* Level 6 */
+li[aria-level="6"]  > .node-row > .node-label { color: var(--l6)  !important; }
+
+/* Level 7 */
+li[aria-level="7"]  > .node-row > .node-label { color: var(--l7)  !important; }
+
+/* Level 8 */
+li[aria-level="8"]  > .node-row > .node-label { color: var(--l8)  !important; }
+
+/* Level 9 */
+li[aria-level="9"]  > .node-row > .node-label { color: var(--l9)  !important; }
+
+/* Level 10 */
+li[aria-level="10"] > .node-row > .node-label { color: var(--l10) !important; }
+
+/* Levels 11–15 */
 li[aria-level="11"] > .node-row > .node-label,
 li[aria-level="12"] > .node-row > .node-label,
 li[aria-level="13"] > .node-row > .node-label,
 li[aria-level="14"] > .node-row > .node-label,
-li[aria-level="15"] > .node-row > .node-label { color: #38bdf8; }
+li[aria-level="15"] > .node-row > .node-label { color: #38bdf8 !important; }
+
+/* Levels 16–18 */
 li[aria-level="16"] > .node-row > .node-label,
 li[aria-level="17"] > .node-row > .node-label,
-li[aria-level="18"] > .node-row > .node-label { color: #a3e635; }
-li[aria-level="19"] > .node-row > .node-label,
-li[aria-level="20"] > .node-row > .node-label { color: #fb7185; }
+li[aria-level="18"] > .node-row > .node-label { color: #a3e635 !important; }
 
-/* Deep levels fallback */
-li[aria-level] > .node-row > .node-label { color: var(--lN); }
+/* Levels 19–20 */
+li[aria-level="19"] > .node-row > .node-label,
+li[aria-level="20"] > .node-row > .node-label { color: #fb7185 !important; }
 
 /* ─── SEARCH HIGHLIGHTING ─── */
 li.search-match > .node-row {
