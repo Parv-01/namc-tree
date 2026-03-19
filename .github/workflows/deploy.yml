@@ -1,0 +1,83 @@
+# ═══════════════════════════════════════════════════════════════
+# .github/workflows/deploy.yml
+#
+# NAMC Tree — Build & Deploy to GitHub Pages
+#
+# Triggered on every push to `main`.
+#
+# What it does:
+#   1. Checks out the source code
+#   2. Reads GitHub Secrets (APPS_SCRIPT_URL, API_KEY, SHEET_ID)
+#   3. Runs scripts/build.sh which:
+#        • Copies all source files into a  dist/  folder
+#        • Replaces placeholder tokens in api.js with real secret values
+#   4. Deploys the dist/ folder to GitHub Pages
+#
+# Required GitHub Secrets (Settings → Secrets → Actions):
+#   APPS_SCRIPT_URL   – Your deployed Apps Script Web App URL
+#   NAMC_API_KEY      – The API key set in backend/Code.gs EDIT_API_KEY
+#   SHEET_ID          – Your Google Spreadsheet ID (used only in Code.gs,
+#                       but good to store here for reference)
+# ═══════════════════════════════════════════════════════════════
+
+name: Build & Deploy NAMC Tree
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:          # Allow manual trigger from Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment at a time
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout source ──────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Set up Python (for the build script) ──────────────
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # ── 3. Build dist/ with secrets injected ─────────────────
+      - name: Build distribution
+        env:
+          APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_URL }}
+          NAMC_API_KEY:    ${{ secrets.NAMC_API_KEY }}
+          SHEET_ID:        ${{ secrets.SHEET_ID }}
+        run: |
+          chmod +x scripts/build.sh
+          bash scripts/build.sh
+
+      # ── 4. Upload Pages artifact ──────────────────────────────
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

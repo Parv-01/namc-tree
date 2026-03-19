@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NAMC – National Ayurveda Morbidity Codes</title>
+  <meta name="description" content="Interactive tree of National Ayurveda Morbidity Codes with 2387 nodes, definitions, and editing capabilities." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@400;500;600;700&family=Noto+Serif+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════ HEADER ═══════════════════════════════════ -->
+  <header class="header" id="pageHeader">
+    <div class="header-top">
+      <div class="brand">
+        <span class="brand-icon">🌿</span>
+        <div>
+          <h1 class="brand-title">NAMC <span class="brand-sub">National Ayurveda Morbidity Codes</span></h1>
+          <p class="brand-meta" id="statsLine">Loading…</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost" id="btnTheme" title="Toggle theme">☀</button>
+        <button class="btn btn-primary" id="btnAddRoot" title="Add new root node">＋ Add Node</button>
+        <button class="btn btn-ghost" id="btnExport" title="Export as CSV">⬇ Export CSV</button>
+      </div>
+    </div>
+
+    <div class="search-bar">
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 20 20" fill="none">
+          <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.6"/>
+          <path d="m14 14 3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <input id="searchInput" class="search-input" type="search"
+               placeholder="Search codes, Sanskrit terms, definitions…" autocomplete="off" spellcheck="false" />
+        <span class="search-badge" id="matchBadge" hidden></span>
+        <button class="search-clear" id="searchClear" hidden aria-label="Clear search">×</button>
+      </div>
+      <div class="tree-controls">
+        <button class="btn btn-sm" id="btnExpandAll">▶ Expand All</button>
+        <button class="btn btn-sm" id="btnCollapseAll">◀ Collapse</button>
+        <button class="btn btn-sm" id="btnLevel2">L2 View</button>
+        <button class="btn btn-sm" id="btnLevel4">L4 View</button>
+      </div>
+    </div>
+
+    <div class="level-legend" id="levelLegend">
+      <!-- Injected by JS -->
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════ LAYOUT ════════════════════════════════════ -->
+  <div class="app-layout">
+
+    <!-- Tree panel -->
+    <main class="tree-panel" id="treePanel" role="main" aria-label="Ayurveda Morbidity Code Tree">
+      <!-- Tree HTML injected by app.js after data loads -->
+      <div class="loading-state" id="loadingState">
+        <div class="spinner"></div>
+        <p>Loading tree…</p>
+      </div>
+    </main>
+
+    <!-- Detail / Edit side panel -->
+    <aside class="detail-panel" id="detailPanel" aria-label="Node detail" hidden>
+      <div class="dp-inner">
+
+        <div class="dp-header">
+          <div class="dp-code-badge" id="dpCode"></div>
+          <h2 class="dp-term" id="dpTerm"></h2>
+          <p class="dp-diac" id="dpDiac"></p>
+          <p class="dp-dev" id="dpDev"></p>
+          <span class="dp-en-tag" id="dpEn"></span>
+          <button class="dp-close-btn" id="dpClose" aria-label="Close panel">×</button>
+        </div>
+
+        <div class="dp-tabs">
+          <button class="dp-tab active" data-tab="view">📖 View</button>
+          <button class="dp-tab" data-tab="edit">✏️ Edit</button>
+        </div>
+
+        <!-- View tab -->
+        <div class="dp-tab-content" id="tabView">
+          <div class="dp-section">
+            <label class="dp-label">Long Definition</label>
+            <div class="dp-text" id="viewDef"></div>
+          </div>
+          <div class="dp-section">
+            <label class="dp-label">Diacritical Term</label>
+            <div class="dp-text" id="viewDiac2"></div>
+          </div>
+          <div class="dp-section">
+            <label class="dp-label">Devanāgarī</label>
+            <div class="dp-text dp-devanagari" id="viewDev2"></div>
+          </div>
+          <div class="dp-section">
+            <label class="dp-label">English Name</label>
+            <div class="dp-text" id="viewEn2"></div>
+          </div>
+          <div class="dp-section" id="viewOntSection" hidden>
+            <label class="dp-label">Ontology Note</label>
+            <div class="dp-text dp-ontology" id="viewOnt"></div>
+          </div>
+        </div>
+
+        <!-- Edit tab -->
+        <div class="dp-tab-content" id="tabEdit" hidden>
+          <form id="editForm" onsubmit="return false">
+            <div class="form-group">
+              <label class="form-label" for="editDef">Long Definition</label>
+              <textarea class="form-control" id="editDef" rows="6" placeholder="Enter full definition…"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="editTerm">Sanskrit Term</label>
+              <input class="form-control" id="editTerm" type="text" placeholder="e.g. vAtasa~jcayaH" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="editDiac">Diacritical</label>
+              <input class="form-control" id="editDiac" type="text" placeholder="e.g. vātasañcayaḥ" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="editDev">Devanāgarī</label>
+              <input class="form-control" id="editDev" type="text" placeholder="e.g. वातसञ्चयः" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="editEn">English Name</label>
+              <input class="form-control" id="editEn" type="text" placeholder="e.g. Accumulation of Vata pattern" />
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-save" id="btnSaveEdit">💾 Save Changes</button>
+              <button type="button" class="btn btn-ghost" id="btnCancelEdit">Cancel</button>
+              <button type="button" class="btn btn-danger" id="btnDeleteNode">🗑 Delete</button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </aside>
+  </div>
+
+  <!-- ═══════════════════════════════════ MODALS ════════════════════════════════════ -->
+
+  <!-- Add Node Modal -->
+  <div class="modal-overlay" id="addModal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="addModalTitle">➕ Add New Node</h3>
+        <button class="modal-close" id="addModalClose">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="newCode">NAMC Code <span class="required">*</span></label>
+          <input class="form-control" id="newCode" type="text" placeholder="e.g. AAA-2.7" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newTerm">Sanskrit Term <span class="required">*</span></label>
+          <input class="form-control" id="newTerm" type="text" placeholder="e.g. vAtakShayaH" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newDiac">Diacritical</label>
+          <input class="form-control" id="newDiac" type="text" placeholder="e.g. vātakṣayaḥ" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newDev">Devanāgarī</label>
+          <input class="form-control" id="newDev" type="text" placeholder="e.g. वातक्षयः" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newEn">English Name</label>
+          <input class="form-control" id="newEn" type="text" placeholder="e.g. Depletion of vata pattern" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newParent">Parent Node Code</label>
+          <input class="form-control" id="newParent" type="text" placeholder="Leave blank to add at root level" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newDef">Definition</label>
+          <textarea class="form-control" id="newDef" rows="4" placeholder="Optional clinical definition…"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="addModalCancel">Cancel</button>
+        <button class="btn btn-primary" id="addModalSubmit">Add Node</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal-overlay" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" hidden>
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 id="deleteModalTitle">🗑 Confirm Delete</h3>
+        <button class="modal-close" id="deleteModalClose">×</button>
+      </div>
+      <div class="modal-body">
+        <p id="deleteModalMsg" class="modal-text"></p>
+        <div class="callout callout-warn">
+          <strong>Note:</strong> This removes the node from the tree view and marks it deleted in your next CSV export. To permanently remove from your Excel / Google Sheet, import the exported CSV.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="deleteModalCancel">Cancel</button>
+        <button class="btn btn-danger" id="deleteModalConfirm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ TOAST ════════════════════════════════════ -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- ═══════════════════════════════════ SCRIPTS ═══════════════════════════════════ -->
+  <script src="data.js"></script>     <!-- Embedded Excel data as JS object -->
+  <script src="api.js"></script>      <!-- Google Sheets API connector -->
+  <script src="store.js"></script>    <!-- Local state & persistence manager -->
+  <script src="tree.js"></script>     <!-- Tree DOM builder & interaction -->
+  <script src="app.js"></script>      <!-- Main app controller & UI events -->
+</body>
+</html>
